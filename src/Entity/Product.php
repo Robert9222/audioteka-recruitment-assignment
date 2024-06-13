@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use DateTimeImmutable;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
@@ -19,11 +21,19 @@ class Product implements \App\Service\Catalog\Product
     #[ORM\Column(type: 'integer', nullable: false)]
     private string $priceAmount;
 
+    #[ORM\Column(type: 'datetime_immutable', nullable: false)]
+    private DateTimeImmutable $createdAt;
+
+    #[ORM\OneToMany(mappedBy: "product", targetEntity: "CartProducts")]
+    private $carts;
+
     public function __construct(string $id, string $name, int $price)
     {
         $this->id = Uuid::fromString($id);
         $this->name = $name;
         $this->priceAmount = $price;
+        $this->createdAt = new DateTimeImmutable();
+        $this->carts = new ArrayCollection();
     }
 
     public function getId(): string
@@ -36,8 +46,23 @@ class Product implements \App\Service\Catalog\Product
         return $this->name;
     }
 
+    public function setName(string $name): void
+    {
+        $this->name = $name;
+    }
+
     public function getPrice(): int
     {
         return $this->priceAmount;
+    }
+
+    public function setPrice(string $priceAmount): void
+    {
+        $this->priceAmount = $priceAmount;
+    }
+
+    public function getCreatedAt(): DateTimeImmutable
+    {
+        return $this->createdAt;
     }
 }
