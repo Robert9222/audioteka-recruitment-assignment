@@ -2,7 +2,7 @@
 
 namespace App\Repository;
 
-use App\Service\Catalog\Product;
+use App\Entity\Product;
 use App\Service\Catalog\ProductProvider;
 use App\Service\Catalog\ProductService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -21,11 +21,11 @@ class ProductRepository implements ProductProvider, ProductService
     public function getProducts(int $page = 0, int $count = 3): iterable
     {
         return $this->repository->createQueryBuilder('p')
+            ->orderBy('p.createdAt', 'DESC')
             ->setMaxResults($count)
             ->setFirstResult($page * $count)
             ->getQuery()
-            ->getResult()
-        ;
+            ->getResult();
     }
 
     public function getTotalCount(): int
@@ -55,5 +55,17 @@ class ProductRepository implements ProductProvider, ProductService
             $this->entityManager->remove($product);
             $this->entityManager->flush();
         }
+    }
+
+    public function update(string $id, string $name, int $price): void
+    {
+        $product = $this->entityManager->getRepository(Product::class)->find($id);
+        if ($product === null) {
+            throw new \Exception("Product not found");
+        }
+        $product->setName($name);
+        $product->setPrice($price);
+
+        $this->entityManager->flush();
     }
 }
